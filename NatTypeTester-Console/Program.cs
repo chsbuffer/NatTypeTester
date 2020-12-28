@@ -1,4 +1,6 @@
 using STUN.Client;
+using STUN.Enums;
+using STUN.StunResult;
 using STUN.Utils;
 using System;
 using System.Net;
@@ -39,6 +41,48 @@ namespace NatTypeTester
 			Console.WriteLine($@"Mapped address: {res.PublicEndPoint}");
 			Console.WriteLine($@"Nat mapping behavior: {res.MappingBehavior}");
 			Console.WriteLine($@"Nat filtering behavior: {res.FilteringBehavior}");
+			Console.WriteLine($@"result: {GetResult(res)}");
+		}
+
+		private static string GetResult(StunResult5389 res)
+		{
+			var result = "error";
+			switch (res.FilteringBehavior)
+			{
+				case FilteringBehavior.Unknown:
+					result = FilteringBehavior.Unknown.ToString();
+					break;
+				case FilteringBehavior.UnsupportedServer:
+					result = FilteringBehavior.UnsupportedServer.ToString();
+					break;
+				case FilteringBehavior.Fail:
+					result = FilteringBehavior.Fail.ToString();
+					break;
+				case FilteringBehavior.EndpointIndependent:
+					switch (res.MappingBehavior)
+					{
+						case MappingBehavior.EndpointIndependent:
+							result = "1";
+							break;
+						case MappingBehavior.AddressDependent:
+						case MappingBehavior.AddressAndPortDependent:
+							result = "2";
+							break;
+						default:
+							break;
+					}
+					break;
+				case FilteringBehavior.AddressDependent:
+					result = "3";
+					break;
+				case FilteringBehavior.AddressAndPortDependent:
+					result = "4";
+					break;
+				default:
+					break;
+			}
+
+			return result;
 		}
 	}
 }
