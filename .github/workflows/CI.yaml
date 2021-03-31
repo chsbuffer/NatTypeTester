@@ -7,9 +7,6 @@ jobs:
   build:
     name: Build
     runs-on: windows-latest
-    env:
-      NET_TFM: net48
-      Configuration: Release
 
     steps:
     - uses: actions/checkout@v2
@@ -19,7 +16,11 @@ jobs:
 
     - name: Build
       shell: pwsh
-      run: msbuild -v:m -m -r -p:Configuration=Release NatTypeTester-Console/NatTypeTester_Console.csproj
+      run: |
+        cd ${{ env.ProjectName }}
+        dotnet build   -c Release 
+        dotnet publish -c Release -o bin/Publish/ -p:PublishSingleFile=true -r:win-x64 -f net5.0 --no-self-contained -p:AppendRuntimeIdentifierToOutputPath=false
+        cd ..
 
     - name: Upload
       continue-on-error: true
@@ -27,7 +28,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: ${{ env.ProjectName }}
-        path: ${{ env.ProjectName }}/bin/${{ env.Configuration }}/${{ env.NET_TFM }}/NTT.exe
+        path: ${{ env.ProjectName }}/bin/
 
     - name: Get tag
       if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
